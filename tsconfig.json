@@ -5,5 +5,8 @@
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
-  }
+  },
+  "exclude": [
+    "example"
+  ]
 }

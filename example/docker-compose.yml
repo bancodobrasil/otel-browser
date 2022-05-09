@@ -1,0 +1,61 @@
+version: '3.7'
+
+services:
+
+  # frontend:
+  #   image: otel-browser-example-frontend
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+
+  backend1:
+    image: otel-browser-example-backend
+    build: ./backend
+    environment:
+      - EXTERNAL_SERVICE_URL=http://backend2:7000
+      - TELEMETRY_EXPORTER_URL=http://jaeger-all-in-one:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=BACKEND1
+    ports:
+      - "7001:7000"
+
+  backend2:
+    image: otel-browser-example-backend
+    environment:
+      - EXTERNAL_SERVICE_URL=http://backend3:7000
+      - TELEMETRY_EXPORTER_URL=http://jaeger-all-in-one:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=BACKEND2
+    ports:
+      - "7002:7000"
+
+  backend3:
+    image: otel-browser-example-backend
+    environment:
+      - TELEMETRY_EXPORTER_URL=http://jaeger-all-in-one:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=BACKEND3
+    ports:
+      - "7003:7000"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib-dev:latest
+    command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "13133:13133" # health_check extension
+      # - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "55679:55679" # zpages extension
+    depends_on:
+      - jaeger-all-in-one
+
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"

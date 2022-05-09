@@ -1,0 +1,7 @@
+https://dev.to/alekseiberezkin/setting-up-react-typescript-app-without-create-react-app-oph
+
+https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/default_props/
+
+https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/class_components
+
+https://felixgerschau.com/react-typescript-components/
