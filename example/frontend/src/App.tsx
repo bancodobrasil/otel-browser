@@ -1,6 +1,23 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { CollectorTraceExporter } from "@opentelemetry/exporter-collector";
+import { OtelBrowser, OtelBrowserOptions  } from "otel-browser";
+
+const options: OtelBrowserOptions = {
+  urlCollector:"http://localhost:4318/v1/traces",
+  serviceName: "reactjs-example",
+  documentLoadIntrumentation: true,
+  fetchInstrumentation: {
+    enabled: true,
+    propagateTraceHeaderCorsUrls: [
+      "http://localhost:7001",
+      "http://localhost:7002",
+      "http://localhost:7003",
+      "https://swapi.dev/api",
+    ]
+  }
+}
+const otelBrowser = new OtelBrowser(options);
+const tracer = otelBrowser.getTracer("reactjs-calls")
 
 const Container = styled.div`
   display: flex;
@@ -30,11 +47,6 @@ const H1 = styled.h1`
   font-size: 1.5rem;
 `;
 
-const collectorOptions = {
-  url: 'http://localhost:4318/v1/traces',
-};
-
-let exporter = new CollectorTraceExporter(collectorOptions);
 
 export default function App() {
   const [output, setOutput] = useState("")
@@ -49,11 +61,25 @@ export default function App() {
       })
     }
   }
+
+  const invokeServiceTraced = (url: string) => {
+    return () => {
+      tracer.tracing("invoked-service-traced",
+        fetch(url)
+        .then(response =>{
+          return response.text();
+        })
+        .then(data =>{
+          setOutput(output+'\r\n'+ data);
+        })
+      );
+    }
+  }
   return (
     <Container>
       <H1>Test fetch endpoints:</H1>
       <Row>
-        <Button onClick={invokeService("http://localhost:7001/user/user1")}>Service 1</Button>
+        <Button onClick={invokeServiceTraced("http://localhost:7001/user/user1")}>Service 1</Button>
         <Button onClick={invokeService("http://localhost:7002/user/user1")}>Service 2</Button>
         <Button onClick={invokeService("http://localhost:7003/user/user1")}>Service 3</Button>
         <Button onClick={invokeService("https://swapi.dev/api/people/1")}>Star Wars API</Button>

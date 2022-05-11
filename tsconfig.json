@@ -5,6 +5,9 @@
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "types",
+    "outDir": "dist"
   },
   "exclude": [
     "example"
