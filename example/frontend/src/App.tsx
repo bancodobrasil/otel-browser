@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import { OtelBrowser  } from "otel-browser";
-
+import { CollectorTraceExporter } from "@opentelemetry/exporter-collector";
 
 const Container = styled.div`
   display: flex;
@@ -30,6 +29,12 @@ const Stdout = styled.textarea`
 const H1 = styled.h1`
   font-size: 1.5rem;
 `;
+
+const collectorOptions = {
+  url: 'http://localhost:4318/v1/traces',
+};
+
+let exporter = new CollectorTraceExporter(collectorOptions);
 
 export default function App() {
   const [output, setOutput] = useState("")
